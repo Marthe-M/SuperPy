@@ -1,0 +1,84 @@
+SuperPy guidelines:
+Positional arguments:
+  {buy,sell,export,profit,expired,plot,reset}
+                        type of action
+    buy                 Buy a product
+    sell                Sell a product
+    export              Export list of bought/sold files or current inventory to csv file
+    profit              Calculate profit in a set amount of days
+    expired             Check whether products in inventory are expired in a set amount of days
+    plot                Plot bar graph of products in inventory, bought or sold list
+    reset               Choose type of file to be resetted
+
+Commands:
+1. Buy
+usage: main.py buy [-h] --product PRODUCT --buy-price PRICE [--quantity QUANTITY] --exp-date EXP_DATE --buy-date BUY_DATE
+optional arguments:
+  -h, --help           show this help message and exit
+  --product PRODUCT    product name
+  --buy-price PRICE    buy price per product
+  --quantity QUANTITY  quantity of product
+  --exp-date EXP_DATE  product expiration date (format YYYY-MM-DD)
+  --buy-date BUY_DATE  product buy date (format YYYY-MM-DD)
+Examples:
+python main.py buy --product Apple --buy-price 5 --exp-date 2022-03-04 --buy-date 2022-01-05
+python main.py buy --product Apple --buy-price 5 --quantity 10 --exp-date 2022-03-04 --buy-date 2022-01-05
+
+2. Sell: 
+usage: main.py sell [-h] --product PRODUCT [--quantity QUANTITY] --sell-price PRICE --exp-date EXP_DATE --sell-date SELL_DATE
+optional arguments:
+  -h, --help            show this help message and exit
+  --product PRODUCT     product name
+  --quantity QUANTITY   quantity of product
+  --sell-price PRICE    sell price per product
+  --exp-date EXP_DATE   product expiration date (format YYYY-MM-DD)
+  --sell-date SELL_DATE product sell date (format YYYY-MM-DD)
+Examples:
+python main.py sell --product Orange --sell-price 21 --exp-date 2022-09-10 --sell-date 2025-10-01
+python main.py sell --product Orange --quantity 3 --sell-price 21 --exp-date 2022-09-10 --sell-date 2025-10-01
+
+3. Export
+usage: main.py export [-h] --file {bought,sold,inventory}
+optional arguments:
+  -h, --help            show this help message and exit
+  --file {bought,sold,inventory} File to be exported to csv
+Examples:
+python main.py export --file inventory
+python main.py export --file sold
+
+4. Profit
+usage: main.py profit [-h] [--days DAYS]
+optional arguments:
+  -h, --help   show this help message and exit
+  --days DAYS  Calculate profit in a set amount of days (default = 0, today)
+Examples:
+python main.py profit
+python main.py profit --days 365
+
+5. Expired
+usage: main.py expired [-h] [--days DAYS]
+optional arguments:
+  -h, --help   show this help message and exit
+  --days DAYS  Check expired products in a set amount of days (default = 0, today)
+Examples:
+python main.py expired
+python main.py expired --days 365
+
+6. Plot
+usage: main.py plot [-h] --file {bought,sold,inventory}
+optional arguments:
+  -h, --help            show this help message and exit
+  --file {bought,sold,inventory} File to be plotted
+Examples:
+python main.py plot --file inventory
+python main.py plot --file bought
+
+7. Reset
+usage: main.py reset [-h] --file {bought,sold,inventory}
+optional arguments:
+  -h, --help            show this help message and exit
+  --file {bought,sold,inventory}       File to be resetted
+Examples:
+python main.py reset --file inventory
+python main.py reset --file sold
+
