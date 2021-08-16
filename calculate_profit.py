@@ -3,70 +3,62 @@ import pandas as pd
 
 pd.options.mode.chained_assignment = None  # default='warn'
 import os
+from handle_date import handle_date
 
 
-def calculate_profit(input_days):
-    # check if inventory exists
-    if os.path.isfile("df_inventory.pkl") == False:
-        print("There is nothing in the current inventory")
-    elif os.path.isfile("df_inventory.pkl"):
-        today = pd.to_datetime("today")
-        input_date = today + pd.to_timedelta(input_days, unit="d")
-        df_inventory = pd.read_pickle("df_inventory.pkl")
-        # change date columns to datetime object
-        df_inventory["Buy_date"] = pd.to_datetime(
-            df_inventory["Buy_date"], format="%Y-%m-%d"
+def calculate_profit(input_date):
+    # check if input date is of the YYYY-MM-DD format
+    if handle_date(input_date) == False:
+        print("This is the incorrect date string format. It should be YYYY-MM-DD")
+        return
+    elif handle_date(input_date) == True:
+        input_date = pd.to_datetime(input_date)
+    # check if anything was sold
+    if os.path.isfile("df_sold.csv") == False:
+        print("There is nothing sold yet")
+    if os.path.isfile("df_bought.csv") == False:
+        print("There is nothing bought yet")
+    elif os.path.isfile("df_sold.csv") & os.path.isfile("df_bought.csv"):
+        df_sold = pd.read_csv("df_sold.csv")
+        df_bought = pd.read_csv("df_bought.csv")
+
+        # check which items are bought before or at this input date
+        df_bought["Buy_date"] = pd.to_datetime(df_bought["Buy_date"])
+        df_bought["Bought"] = input_date >= df_bought["Buy_date"]
+        df_bought_true = df_bought[df_bought["Bought"] == True]
+
+        # check which items are sold before or at this input date
+        df_sold["Sell_date"] = pd.to_datetime(df_sold["Sell_date"])
+        df_sold["Sold"] = input_date >= df_sold["Sell_date"]
+        df_sold_true = df_sold[df_sold["Sold"] == True]
+
+        # calculate costs of bought products
+        df_bought_true["Buy_price"] = pd.to_numeric(df_bought_true["Buy_price"])
+        df_bought_true["Quantity"] = pd.to_numeric(df_bought_true["Quantity"])
+        df_bought_true["Costs"] = (
+            df_bought_true["Quantity"] * df_bought_true["Buy_price"]
         )
-        df_inventory["Sell_date"] = pd.to_datetime(
-            df_inventory["Sell_date"], format="%Y-%m-%d"
-        )
-        # compare input date to Sell_date and confirm that Sell_date is later than Buy_date
-        df_inventory["Product_sold"] = (input_date >= df_inventory["Sell_date"]) & (
-            df_inventory["Sell_date"] >= df_inventory["Buy_date"]
-        )
-        # change quantity and price columns to floating point numbers
-        df_inventory["Buy_price"] = pd.to_numeric(df_inventory["Buy_price"])
-        df_inventory["Sell_price"] = pd.to_numeric(df_inventory["Sell_price"])
-        df_inventory["Quantity"] = pd.to_numeric(df_inventory["Quantity"])
-        df_inventory["Sell_quantity"] = pd.to_numeric(df_inventory["Sell_quantity"])
-        df_inventory[
-            ["Buy_price", "Sell_price", "Quantity", "Sell_quantity"]
-        ] = df_inventory[
-            ["Buy_price", "Sell_price", "Quantity", "Sell_quantity"]
-        ].astype(
-            float
-        )
-        # select products that are sold at the chosen input_date
-        selected_products = df_inventory.loc[df_inventory["Product_sold"] == True]
-        not_selected_products = df_inventory.loc[df_inventory["Product_sold"] == False]
-        # calculate the profit per sold product
-        selected_products["Profit_per_sale"] = (
-            selected_products["Sell_price"] - selected_products["Buy_price"]
-        )
-        # calculate the total profit per product
-        selected_products["Total_profit"] = (
-            selected_products["Sell_quantity"] * selected_products["Profit_per_sale"]
-        )
-        # calculate the sum of all sold products
-        sum_profit = selected_products["Total_profit"].sum()
-        print("Total profit of sold products:" + " " + str(sum_profit))
-        # update the remaining Quantity of sold products
-        selected_products["Quantity"] = (
-            selected_products["Quantity"] - selected_products["Sell_quantity"]
-        )
-        # append updated inventory to old inventory of non-sold products
-        inventory_new = selected_products[
-            ["Product_ID", "Product_name", "Quantity", "Expiration_date"]
-        ]
-        inventory_remaining = not_selected_products[
-            ["Product_ID", "Product_name", "Quantity", "Expiration_date"]
-        ]
-        updated_inventory = inventory_new.append(inventory_remaining)
-        # select same columns from inventory before selling products
-        inventory_before = df_inventory[
-            ["Product_ID", "Product_name", "Quantity", "Expiration_date"]
-        ]
-        print("Inventory before sales: ")
-        print(inventory_before)
-        print("Inventory after sales: ")
-        print(updated_inventory)
+
+        # calculate benefits of sold products
+        df_sold_true["Sell_price"] = pd.to_numeric(df_sold_true["Sell_price"])
+        df_sold_true["Quantity"] = pd.to_numeric(df_sold_true["Quantity"])
+        df_sold_true["Benefit"] = df_sold_true["Quantity"] * df_sold_true["Sell_price"]
+
+        # calculate profit
+        total_costs = df_bought_true["Costs"].sum()
+        total_benefit = df_sold_true["Benefit"].sum()
+        total_profit = total_benefit - total_costs
+        date = input_date.strftime("%Y-%m-%d")
+
+        if int(total_benefit) == 0:
+            print("No products sold before or on:" + " " + date)
+        if int(total_costs) == 0:
+            print("No products bought before or on:" + " " + date)
+        else:
+            print("Products bought before or on:" + " " + date)
+            print(df_bought_true)
+            print("Products sold before or on:" + " " + date)
+            print(df_sold_true)
+            print("Total costs:" + str(total_costs))
+            print("Total benefit:" + str(total_benefit))
+            print("Total profit:" + str(total_profit))

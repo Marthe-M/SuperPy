@@ -4,7 +4,6 @@ import pandas as pd
 from export import export
 from add_buy_to_inventory import add_buy_to_inventory
 from add_sell_to_inventory import add_sell_to_inventory
-from check_expired import check_expired
 from calculate_profit import calculate_profit
 from plot_data import plot_data
 from reset_files import reset_files
@@ -32,14 +31,11 @@ def handle_args(args):
             price=args.price,
             quantity=args.quantity,
             sell_date=args.sell_date,
-            exp_date=args.exp_date,
         )
     elif args.command == "export":
-        export(args.file)
+        export(selection=args.file, date=args.date)
     elif args.command == "profit":
-        calculate_profit(args.days)
-    elif args.command == "expired":
-        check_expired(args.days)
+        calculate_profit(args.date)
     elif args.command == "plot":
         plot_data(args.file)
     elif args.command == "reset":
@@ -72,30 +68,23 @@ def main():
         default=1,
     )
     buy_parser.add_argument(
-        "--exp-date",
-        type=str,
-        dest="exp_date",
-        help="product expiration date (format YYYY-MM-DD)",
-        required=True,
-    )
-    buy_parser.add_argument(
         "--buy-date",
         type=str,
         dest="buy_date",
         help="product buy date (format YYYY-MM-DD)",
         required=True,
     )
+    buy_parser.add_argument(
+        "--exp-date",
+        type=str,
+        dest="exp_date",
+        help="product expiration date (format YYYY-MM-DD)",
+        required=True,
+    )
 
     sell_parser = subparsers.add_parser("sell", help="Sell a product")
     sell_parser.add_argument(
         "--product", type=str, dest="product", help="product name", required=True
-    )
-    sell_parser.add_argument(
-        "--quantity",
-        type=int,
-        dest="quantity",
-        help="quantity of product",
-        default=1,
     )
     sell_parser.add_argument(
         "--sell-price",
@@ -105,12 +94,13 @@ def main():
         required=True,
     )
     sell_parser.add_argument(
-        "--exp-date",
-        type=str,
-        dest="exp_date",
-        help="product expiration date (format YYYY-MM-DD)",
-        required=True,
+        "--quantity",
+        type=int,
+        dest="quantity",
+        help="quantity of product",
+        default=1,
     )
+
     sell_parser.add_argument(
         "--sell-date",
         type=str,
@@ -118,42 +108,36 @@ def main():
         help="product sell date (format YYYY-MM-DD)",
         required=True,
     )
-
     export_parser = subparsers.add_parser(
         "export",
-        help="Export list of bought/sold files or current inventory to csv file",
+        help="Export selection of data on a specific date",
     )
     export_parser.add_argument(
         "--file",
         type=str,
         dest="file",
-        help="File to be exported to csv",
-        choices=["bought", "sold", "inventory"],
+        help="Data to be exported to .csv file",
+        choices=["expired", "bought", "sold"],
+        required=True,
+    )
+    export_parser.add_argument(
+        "--date",
+        type=str,
+        dest="date",
+        help="Choose date of interest(format YYYY-MM-DD)",
         required=True,
     )
 
     profit_parser = subparsers.add_parser(
         "profit",
-        help="Calculate profit in a set amount of days",
+        help="Calculate profit on a specific date",
     )
     profit_parser.add_argument(
-        "--days",
-        type=int,
-        dest="days",
-        help="Calculate profit in a set amount of days (default = 0, today)",
-        default=0,
-    )
-
-    expired_parser = subparsers.add_parser(
-        "expired",
-        help="Check whether products in inventory are expired in a set amount of days",
-    )
-    expired_parser.add_argument(
-        "--days",
-        type=int,
-        dest="days",
-        help="Check expired products in a set amount of days (default = 0, today)",
-        default=0,
+        "--date",
+        type=str,
+        dest="date",
+        help="Choose date of interest(format YYYY-MM-DD)",
+        required=True,
     )
 
     plot_parser = subparsers.add_parser(
@@ -171,15 +155,15 @@ def main():
 
     reset_parser = subparsers.add_parser(
         "reset",
-        help="Choose type of file to be resetted",
+        help="Reset selection of files or all files",
     )
     reset_parser.add_argument(
         "--file",
         type=str,
         dest="file",
-        help="File to be resetted",
-        choices=["bought", "sold", "inventory"],
-        required=True,
+        help="Files to be resetted",
+        choices=["bought", "sold", "inventory", "all"],
+        default="all",
     )
 
     args = parser.parse_args()

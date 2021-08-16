@@ -4,7 +4,7 @@ import os
 
 
 def plot_data(input):
-    data = pd.read_pickle("df_" + input + ".pkl")
+    data = pd.read_csv("df_" + input + ".csv")
     plot = data.plot.bar(
         x="Product_name",
         y="Quantity",
