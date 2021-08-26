@@ -1,7 +1,0 @@
-Notable elements of my SuperPy implementation:
-1. The Pandas DataFrame.
-I decided to use the Pandas Dataframe software to keep track of the supermarket inventory as well as the registration of bought and sold products. This system is able to store two-dimensional data in a clear and efficient way. In additon, the Pandas library contains modules to work with dates and csv files, which are largely similar to the ones used by the standard library.  The data is locally stored in a .csv file. The new version of SuperPy allows users to use  the 'export' command to further filter the data based on whether products are expired, sold or bought on a specific date. 
-2. Selecting products on both Product_name and Expiration_date.
-Since products might have the same Product_name, but could have a different Expiration_dates, these products should be seperated from eachother in the inventory file. If buying a new product with the same Product_name, the quantity of the products will only be increased if the product also has the same Expiration_date. Otherwise, the product will be listed as a new product. 
-3. The reset command
-The current inventory, and overviews of bought/sold products can easily be deleted with the reset command, so the user can start adding files with a clean slate. In addition, the generated .csv and .pdf will also be deleted from the working directory with this function. The new version of SuperPy also allows the user to delete all generated files at once. 
