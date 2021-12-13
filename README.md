@@ -85,3 +85,7 @@ arguments:
 Examples:
 `python main.py reset --file inventory`
 `python main.py reset --file all`
+
+### Code Preview:
+![SuperPy Preview](https://i.ibb.co/JR51kXs/superpy.png)
+
